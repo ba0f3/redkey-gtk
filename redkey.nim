@@ -4,34 +4,22 @@ const cflags = staticExec("pkg-config --cflags gtk+-3.0")
 import gintro/[gtk, gobject]
 
 type
-  RedKeyContextInfo = object
-    contextId: cstring
-    contextName: cstring
-    defaultLocales: cstring
-    domain: cstring
-    domainDirname: cstring
+  RedKeyContext = ref object of IMContext
+  RedKeyIMContextClass = IMContextClass00
 
-var
-  redkey: RedKeyContextInfo
-redkey.contextid = "redkey"
-redkey.contextName = "RedKey Input Method"
-redkey.defaultLocales = "en:vi:*"
-redkey.domain = "redkey"
 
-var infoList = addr redkey
-
-proc im_module_init(typeModule: TypeModule) {.exportc.} =
+proc im_module_init(typeModule: ptr TypeModule00) {.exportc.} =
   echo "RedKey Init"
+  var typeInfo: TypeInfo00
+  typeInfo.classSize = sizeof(RedKeyIMContextClass).uint16
+
+  discard g_type_module_use(typeModule)
+  echo "init end"
+
 
 proc im_module_exit() {.exportc.} =
   echo "RedKey Exit"
 
 proc im_module_create(context: string): IMContext {.exportc.} =
   echo "RedKey: ", context
-
-#proc im_module_list(contextInfo: ptr pointer, length: ptr int) {.exportc, cdecl.} =
-#  echo "RedKey List"
-#  copyMem(contextInfo[], infoList, sizeof(pointer))
-#
-#  length[] = 1
-#  echo "list end"
+  writeFile("/tmp/redkey.log", "RedKey: " & context)
